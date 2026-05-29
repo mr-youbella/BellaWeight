@@ -30,7 +30,7 @@ export default function Login()
 		setError(null);
 		try
 		{
-			const res = await fetch(`${process.env.BACKEND_URL}/login`,
+			const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/login`,
 			{
 				method: "POST",
 				headers: { "Content-Type": "application/json" },

@@ -38,7 +38,7 @@ export default function Analytics()
 		try
 		{
 			console.log( new Date(`${date}T${time}`).toISOString());
-			const me_res = await fetch(`${process.env.BACKEND_UTL}/me`,
+			const me_res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/me`,
 			{
 				method:  "GET",
 				headers: { Authorization: `Bearer ${token}` },
@@ -46,7 +46,7 @@ export default function Analytics()
 			if (!me_res.ok)
 				return ;
 			const	me = await me_res.json();
-			const	res = await fetch(`${process.env.BACKEND_UTL}/all_weight`,
+			const	res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/all_weight`,
 			{
 				method:  "POST",
 				headers:

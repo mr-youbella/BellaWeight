@@ -17,7 +17,7 @@ export default function useAuth(): boolean | null
 			}
 			try
 			{
-				const res = await fetch(`${process.env.BACKEND_URL}/me`,
+				const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/me`,
 				{
 					method: "GET",
 					headers: { Authorization: `Bearer ${token}` },

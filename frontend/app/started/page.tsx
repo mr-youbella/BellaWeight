@@ -35,7 +35,7 @@ export default function Started()
 	async function ft_submit()
     {
         const token = localStorage.getItem("token");
-        const me_res = await fetch(`${process.env.BACKEND_URL}/me`,
+        const me_res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/me`,
         {
             method:  "GET",
             headers: {
@@ -43,7 +43,7 @@ export default function Started()
         });
         const me = await me_res.json();
 
-        await fetch(`${process.env.BACKEND_URL}/data`,
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/data`,
         {
             method:  "POST",
             headers:
@@ -53,7 +53,7 @@ export default function Started()
             },
             body: JSON.stringify({ user_id: me.id, name: full_name, height, weight, goal_weight }),
         });
-		await fetch(`${process.env.BACKEND_URL}/all_weight`,
+		await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/all_weight`,
 		{
 			method:  "POST",
 			headers:
