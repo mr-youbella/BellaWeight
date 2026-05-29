@@ -12,7 +12,7 @@ dotenv.config({ path: "../.env" });
 
 const fastify = Fastify({ logger: true });
 
-fastify.register(fastifyCors, { origin: process.env.WEBSITE, methods: ["GET", "POST", "PUT", "DELETE"] });
+fastify.register(fastifyCors, { origin: process.env.CORS_WEBSITE, methods: ["GET", "POST", "PUT", "DELETE"] });
 fastify.register(postgres, { connectionString: process.env.DATABASE_URL });
 fastify.register(users);
 fastify.register(dataRoutes);
