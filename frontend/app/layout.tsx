@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ToastContainer } from 'react-toastify';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,7 +15,10 @@ export default function RootLayout
 }>) {
 	return (
 		<html className="bg-[#F2EFFF]" lang="en">
-			<body>{children}</body>
+			<body>
+				{children}
+				<ToastContainer />
+			</body>
 		</html>
 	);
 }

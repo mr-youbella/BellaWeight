@@ -1,9 +1,10 @@
 "use client";
 import { faGripfire } from "@fortawesome/free-brands-svg-icons";
-import { faArrowDown, faArrowUp, faCalendar, faClock, faGauge, faHistory, faPlus, faX } from "@fortawesome/free-solid-svg-icons";
+import { faArrowDown, faArrowUp, faCalendar, faClock, faEquals, faGauge, faHistory, faPlus, faTrash, faX } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import Modal from '@mui/material/Modal';
+import { toast } from 'react-toastify';
 import { useEffect, useState } from "react";
 import 'animate.css';
 import { useRouter } from "next/navigation";
@@ -32,6 +33,7 @@ export default function Analytics()
 	const { data, all_weight } = result;
 	async function addWeight()
 	{
+		const	toast_id = toast.loading("Adding weight...");
 		const	token = localStorage.getItem("token");
 		if (!token)
 			return;
@@ -44,7 +46,7 @@ export default function Analytics()
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			if (!me_res.ok)
-				return ;
+				return (toast.update(toast_id, { render: "Something went wrong", type: "error", isLoading: false, autoClose: 3000 }));
 			const	me = await me_res.json();
 			const	res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/all_weight`,
 			{
@@ -58,14 +60,13 @@ export default function Analytics()
 			});
 			console.log(await res.json());
 			if (!res.ok)
-				return ;
-			// const new_entry = await res.json();
-			// setAllWeight((prev) => [...prev, new_entry]);
+				return (toast.update(toast_id, { render: "Failed to add weight", type: "error", isLoading: false, autoClose: 3000 }));
+			toast.update(toast_id, { render: "Weight added! 💪", type: "success", isLoading: false, autoClose: 2000 });
 			refresh();
 		}
 		catch (err)
 		{
-			console.error("Failed to add weight:", err);
+			toast.update(toast_id, { render: "Server is not responding", type: "error", isLoading: false, autoClose: 3000 });
 		}
 	}
 	async function logWeight()
@@ -82,6 +83,34 @@ export default function Analytics()
 		setDate(new Date().toISOString().split("T")[0]);
 		setTime(new Date().toTimeString().slice(0, 5));
 	}
+	async function deleteWeight(id: number)
+	{
+		const	sorted  = [...all_weight].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+   		const	is_first = sorted[0]?.id === id;
+   		if (is_first)
+   		{
+   			toast.error("You can't delete your first weight entry!");
+   			return ;
+   		}
+		const	toast_id = toast.loading("Deleting weight...");
+		const	token = localStorage.getItem("token");
+		try
+		{
+			const	res   = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/all_weight/${id}`,
+			{
+				method:  "DELETE",
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			if (!res.ok)
+				return (toast.update(toast_id, { render: "Failed to delete", type: "error", isLoading: false, autoClose: 3000 }));
+	 		toast.update(toast_id, { render: "Weight deleted! 🗑️", type: "success", isLoading: false, autoClose: 2000 });
+			refresh();
+		}
+		catch
+		{
+			toast.update(toast_id, { render: "Server is not responding", type: "error", isLoading: false, autoClose: 3000 });
+		}
+	}
 	const	current_weight = all_weight.length ? Number(all_weight.reduce((max, item) => (new Date(item.date) > new Date(max.date) ? item : max)).weight) : 0;
 	const	highest = Math.max(...all_weight.map((w) => Number(w.weight)));
 	const	lowest  = Math.min(...all_weight.map((w) => Number(w.weight)));
@@ -91,8 +120,14 @@ export default function Analytics()
 	let		progress = (1 - Math.abs(current_weight - goal) / maxDistance) * 100;
 	progress = Math.max(0, Math.min(progress, 100));
 	progress = Math.round(progress);
-	const	bmi = data ? current_weight / ((data.height / 100) * (data.height / 100)) : 0;
 
+	const	bmi = current_weight / ((Number(data.height) / 100) * (Number(data.height) / 100));
+	const	bmi_value = bmi.toFixed(1);
+	const	bmi_status = bmi < 18.5 ? "Underweight" : bmi < 25 ? "Healthy" : bmi < 30 ? "Overweight" : "Obese";
+	const	bmi_color = bmi < 18.5 ? "text-cyan-500" : bmi < 25 ? "text-green-700" : bmi < 30 ? "text-orange-500" : "text-red-600";
+	const	bmi_message = bmi < 18.5 ? "Your BMI is below the healthy range." : bmi < 25 ? "Your BMI is in the healthy range." : bmi < 30 ? "Your BMI is above the healthy range." : "Your BMI is in the obese range.";
+	const	bmi_indicator = Math.min(Math.max(((bmi - 10) / (40 - 10)) * 100, 0), 100);
+	const	bmi_rotation = Math.min(Math.max(((bmi - 10) / (40 - 10)) * 180, 0), 180);
 	return (
 		<div>
 			<nav className="bg-[#E2DFFF] p-3">
@@ -164,23 +199,29 @@ export default function Analytics()
 							<p className="text-base bg-[#6FFBBE]/50 p-1 rounded-xl px-3 text-[#005236] font-semibold">Healthy</p>
 						</div>
 						<div className="grid md:flex justify-items-center gap-3 mt-3">
-							<div className="relative w-20 aspect-square">
-  								<div className="absolute inset-0 rounded-full border-8 border-black/20"></div>
-  								<div className="absolute inset-0 rounded-full border-8 border-[#005236] border-t-transparent rotate-45"></div>
-								<div className="absolute inset-0 flex items-center justify-center text-black font-bold">{bmi.toFixed(2)}</div>
-  							</div>
-							<div className="w-full">
-								<div className="flex justify-between text-sm font-semibold mb-2 px-1">
+							<div className="relative w-20 aspect-square shrink-0">
+								<div className="absolute inset-0 rounded-full border-8 border-black/20"></div>
+								<div style={{ transform: `rotate(${bmi_rotation}deg)` }} className={`absolute inset-0 rounded-full border-8 border-t-transparent ${ bmi < 18.5 ? "border-cyan-400": bmi < 25 ? "border-green-700": bmi < 30 ? "border-orange-500": "border-red-600" }`}></div>
+								<div className="absolute inset-0 flex items-center justify-center text-black font-bold text-sm">{bmi_value}</div>
+							</div>
+							<div className="w-full min-w-0">
+								<div className="flex justify-between text-xs font-semibold mb-1 px-1 text-gray-500">
 									<span>Under</span>
 									<span>Healthy</span>
 									<span>Over</span>
+									<span>Obese</span>
 								</div>
-								<div className="flex w-full h-2 overflow-hidden rounded-full">
+								<div className="relative flex w-full h-3 overflow-hidden rounded-full">
 									<div className="w-1/4 bg-cyan-400"></div>
-									<div className="w-2/4 bg-green-800"></div>
-									<div className="w-1/4 bg-red-600"></div>
+									<div className="w-2/4 bg-green-700"></div>
+									<div className="bg-orange-500" style={{ width: "12.5%" }}></div>
+									<div className="bg-red-600" style={{ width: "12.5%" }}></div>
+									<div className="absolute top-0 h-full w-1 bg-black rounded-full transition-all duration-500" style={{ left: `${bmi_indicator}%` }}></div>
 								</div>
-								<p className="mt-2 text-gray-600 text-sm font-semibold">Your BMI is in the healthy range for your height.</p>
+								<div className="flex justify-between mt-2">
+									<p className={`text-sm font-bold ${bmi_color}`}>{bmi_status}</p>
+									<p className="text-sm text-gray-500 font-semibold">{bmi_message}</p>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -191,19 +232,32 @@ export default function Analytics()
 						<p className="uppercase text-sm font-semibold text-[#6760FD]">View all</p>
 					</div>
 					<div className="mt-5 grid grid-cols-1 gap-2">
-						{[...all_weight].sort((a, b) => (new Date(b.date).getTime() - new Date(a.date).getTime())).map((value, index) =>
+						{[...all_weight].sort((a, b) => (new Date(b.date).getTime() - new Date(a.date).getTime())).map((value, index, arr) =>
 						{
+							const	prev = arr[index + 1];
+							const	diff = prev ? Number(value.weight) - Number(prev.weight) : 0;
+							const	is_up = diff > 0;
+							const	is_same = diff === 0;
+
 							return (
 								<div key={index} className="flex justify-between bg-white rounded-2xl p-4">
-									<div className="flex gap-3">
-										<FontAwesomeIcon className="my-auto text-xl rounded-full bg-[#C3C0FF] text-[#4D44E3] p-2" icon={faHistory}/>
-										<div>
-											<p className="text-2xl font-bold">{value.weight}<span className="text-[0.6em]"> Kg</span></p>
-											<p className="text-[#505F76] text-sm font-semibold">{new Date(value.date).toISOString().split('T')[0]} {new Date(value.date).toTimeString().slice(0, 5)}</p>
-										</div>
-									</div>
-									<p className="my-auto text-[#00A572] font-semibold"><FontAwesomeIcon icon={faArrowUp}/> 0.3 Kg</p>
+								<div className="flex gap-3">
+								   <FontAwesomeIcon className="my-auto text-xl rounded-full bg-[#C3C0FF] text-[#4D44E3] p-2" icon={faHistory}/>
+								   <div>
+									  <p className="text-2xl font-bold">{value.weight}<span className="text-[0.6em]"> Kg</span></p>
+									  <p className="text-[#505F76] text-sm font-semibold">{new Date(value.date).toISOString().split('T')[0]} {new Date(value.date).toTimeString().slice(0, 5)}</p>
+									  {prev ? (
+										 <p className={`text-xs font-semibold mt-1 ${is_same ? "text-gray-400" : is_up ? "text-red-500" : "text-[#00A572]"}`}>
+											<FontAwesomeIcon icon={is_same ? faEquals : is_up ? faArrowUp : faArrowDown}/>
+											{" "}{Math.abs(diff).toFixed(2)} Kg
+										 </p>
+									  ) : (
+										 <p className="text-xs text-gray-400 font-semibold mt-1">— first entry</p>
+									  )}
+								   </div>
 								</div>
+								<button onClick={() => deleteWeight(value.id)} className="my-auto bg-red-100 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-xl transition-all duration-300 cursor-pointer"><FontAwesomeIcon icon={faTrash}/></button>
+							</div>
 							);
 						})}
 					</div>

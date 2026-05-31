@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import useAuth from "../auth/auth";
+import { toast } from 'react-toastify';
 
 export default function Login()
 {
@@ -13,8 +14,6 @@ export default function Login()
 	const	is_valid = useAuth();
 	let		[identifier, setIdentifier] = useState<string>("");
 	let		[password, setPassword] = useState<string>("");
-	let		[error, setError] = useState<string | null>(null);
-	let		[loading, setLoading] = useState<boolean>(false);
 
 	useEffect(() =>
 	{
@@ -26,8 +25,7 @@ export default function Login()
 	async function handleSubmit(e: React.FormEvent)
 	{
 		e.preventDefault();
-		setLoading(true);
-		setError(null);
+		const	toast_id = toast.loading("Logging in...");
 		try
 		{
 			const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/login`,
@@ -38,17 +36,17 @@ export default function Login()
 			});
 			const data = await res.json();
 			if (!res.ok)
-				return setError(data.error || "Something went wrong");
-			localStorage.setItem("token", data.token);
-			router.push("/started");
+				toast.update(toast_id, { render: data.error || "Something went wrong", type: "error", isLoading: false, autoClose: 3000 });
+			else
+			{
+				toast.update(toast_id, { render: "Welcome back! 👋", type: "success", isLoading: false, autoClose: 1500 });
+				localStorage.setItem("token", data.token);
+				router.push("/started");
+			}
 		}
 		catch (err)
 		{
-			setError("Server is not responding");
-		}
-		finally
-		{
-			setLoading(false);
+			toast.update(toast_id, { render: "Server is not responding", type: "error", isLoading: false, autoClose: 3000 });
 		}
 	};
 

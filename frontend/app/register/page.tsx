@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import useAuth from "../auth/auth";
+import { toast } from 'react-toastify';
 
 export default function Register()
 {
@@ -14,8 +15,6 @@ export default function Register()
 	let		[username, setUsername] = useState<string>("");
 	let		[email, setEmail] = useState<string>("");
 	let		[password, setPassword] = useState<string>("");
-	let		[error, setError] = useState<string | null>(null);
-	let		[loading, setLoading] = useState<boolean>(false);
 
 	useEffect(() =>
 	{
@@ -27,8 +26,13 @@ export default function Register()
 	async function handleSubmit(e: React.FormEvent)
 	{
 		e.preventDefault();
-		setError(null);
-		setLoading(true);
+		if (username.length < 3)
+			return (toast.error("Username must be at least 3 characters!"));
+		if (!email.includes("@") || !email.includes("."))
+			return (toast.error("Please enter a valid email!"));
+		if (password.length < 6)
+			return (toast.error("Password must be at least 6 characters!"));
+		const	toast_id = toast.loading("Creating your account...");
 		try
 		{
 			const	res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users`,
@@ -39,17 +43,16 @@ export default function Register()
 			});
 			const	data = await res.json();
 			if (!res.ok)
-				return setError(data.error || "Something went wrong");
+				toast.update(toast_id, { render: data.error || "Something went wrong", type: "error", isLoading: false, autoClose: 3000 });
 			else
-				router.push("/login");
+			{
+				toast.update(toast_id, { render: "Account created successfully! 🎉", type: "success", isLoading: false, autoClose: 3000 });
+				router.push("/login"); 
+			}
 		}
 		catch (err)
 		{
-			setError("Server is not responding");
-		}
-		finally
-		{
-			setLoading(false);
+			toast.update(toast_id, { render: "Server is not responding", type: "error", isLoading: false, autoClose: 3000 });
 		}
 	}
 

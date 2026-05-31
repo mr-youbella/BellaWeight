@@ -32,9 +32,7 @@ export default async function authRoutes(fastify: FastifyInstance)
 			if (!isValid)
 				return reply.status(401).send({ error: "Invalid credentials" });
 			const token = fastify.jwt.sign({ id: user.id, username: user.username, email: user.email }, { expiresIn: "7d" });
-			return reply.send({
-				
-				token, user: { id: user.id, username: user.username, email: user.email }});
+			return reply.send({token, user: { id: user.id, username: user.username, email: user.email }});
 		}
 		catch (err: any)
 		{

@@ -35,8 +35,19 @@ export default async function allWeightRoutes(fastify: FastifyInstance)
 		} catch (err: any)
 		{
 			if (err.code === "23503")
-				return reply.code(404).send({ error: "User not found" });
+				return (reply.code(404).send({ error: "User not found" }));
 			throw err;
 		}
 	});
+
+	fastify.delete<{ Params: { id: string } }>("/all_weight/:id", { onRequest: [fastify.authenticate] }, async (req, reply) =>
+	{
+		const { id } = req.params;
+		const { rows } = await fastify.pg.query("DELETE FROM all_weight WHERE id = $1 RETURNING *", [id]);
+		if (!rows.length)
+			return (reply.code(404).send({ error: "Weight entry not found" }));
+		return (reply.send({ message: "Deleted successfully", deleted: rows[0] }));
+	});
 }
+
+
