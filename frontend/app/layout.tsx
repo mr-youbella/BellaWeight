@@ -38,7 +38,7 @@ export default function RootLayout
 		children: React.ReactNode;
 	}>) {
 	return (
-		<html lang="en">
+		<html className="bg-[#F2EFFF]" lang="en">
 			<body>
 				{children}
 				<ToastContainer />

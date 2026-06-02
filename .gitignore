@@ -41,5 +41,5 @@ frontend/.vercel
 frontend/*.tsbuildinfo
 frontend/next-env.d.ts
 
-.env
+.env*
 .http

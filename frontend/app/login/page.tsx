@@ -59,7 +59,7 @@ export default function Login()
 	};
 
 	return (
-		<main className="flex flex-col md:w-2/3 xl:w-1/2 md:mx-auto p-10 bg-[#F2EFFF]">
+		<main className="flex flex-col md:w-2/3 xl:w-1/2 md:mx-auto p-10">
 			<div className="flex flex-col justify-center items-center text-center">
 				<img className="w-15" src="/logo.png" alt="logo"/>
 				<h1 className="text-3xl font-bold">BellaWeight</h1>
