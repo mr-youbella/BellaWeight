@@ -11,14 +11,14 @@ import { toast } from 'react-toastify';
 export default function Login()
 {
 	const	router = useRouter();
-	const	is_valid = useAuth();
+	const	{ is_valid } = useAuth();
 	let		[identifier, setIdentifier] = useState<string>("");
 	let		[password, setPassword] = useState<string>("");
 
 	useEffect(() =>
 	{
 		if (is_valid === true)
-			router.replace("/started");
+			router.replace("/home");
 	}, [is_valid]);
 	if (is_valid === null)
 		return (null); 
@@ -41,7 +41,15 @@ export default function Login()
 			{
 				toast.update(toast_id, { render: "Welcome back! 👋", type: "success", isLoading: false, autoClose: 1500 });
 				localStorage.setItem("token", data.token);
-				router.push("/started");
+				const data_res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/data/${data.user.id}`,
+				{
+					method:  "GET",
+					headers: { Authorization: `Bearer ${data.token}` },
+				});
+				if (data_res.ok)
+					router.push("/home");
+				else
+					router.push("/started");
 			}
 		}
 		catch (err)
@@ -51,9 +59,9 @@ export default function Login()
 	};
 
 	return (
-		<main className="flex flex-col md:w-2/3 xl:w-1/2 md:mx-auto p-10">
+		<main className="flex flex-col md:w-2/3 xl:w-1/2 md:mx-auto p-10 bg-[#F2EFFF]">
 			<div className="flex flex-col justify-center items-center text-center">
-				<img className="w-20" src="/logo.png" alt="logo"/>
+				<img className="w-15" src="/logo.png" alt="logo"/>
 				<h1 className="text-3xl font-bold">BellaWeight</h1>
 			</div>
 			<div className="mt-10 bg-white rounded-3xl shadow-2xl shadow-black/50 xl:w-1/2 xl:mx-auto p-7 py-10">

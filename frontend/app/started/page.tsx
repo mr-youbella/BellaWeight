@@ -10,7 +10,7 @@ import useUserData from "./useUserData";
 
 export default function Started()
 {
-	const	is_valid = useAuth();
+	const	{ is_valid } = useAuth();
 	const	has_data  = useUserData();
 	const	router = useRouter();
 	let		[step, setStep] = useState<number>(1);
@@ -28,7 +28,7 @@ export default function Started()
 	useEffect(() =>
     {
         if (has_data === true)
-            router.replace("/analytics");
+            router.replace("/analyticsWeight");
     }, [has_data]);
 	if (is_valid === null || has_data === null)
         return (null);
@@ -63,7 +63,7 @@ export default function Started()
 			},
 			body: JSON.stringify({ user_id: me.id, weight }),
 		});
-        router.replace("/analytics");
+        router.replace("/analyticsWeight");
     }
 	function ft_continue()
 	{
@@ -94,9 +94,9 @@ export default function Started()
 	}
 
 	return (
-		<main className="flex flex-col md:w-2/3 xl:w-1/2 md:mx-auto p-10">
+		<main className="flex flex-col md:w-2/3 xl:w-1/2 md:mx-auto p-10 bg-[#F2EFFF]">
 			<div className="flex flex-col justify-center items-center text-center">
-				<img className="w-20" src="/logo.png" alt="logo"/>
+				<img className="w-15" src="/logo.png" alt="logo"/>
 				<h1 className="text-3xl font-bold">BellaWeight</h1>
 				<p className="xl:w-1/2 mx-auto text-black/50">Track your weight progress with precision, every step of your wellness journey.</p>
 			</div>

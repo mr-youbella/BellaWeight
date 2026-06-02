@@ -10,10 +10,11 @@ import 'animate.css';
 import { useRouter } from "next/navigation";
 import useGetData from "./getData";
 import useAuth from "../auth/auth";
+import Link from "next/link";
 
 export default function Analytics()
 {
-	const	is_valid = useAuth();
+	const	{ is_valid, is_old_user } = useAuth();
 	const	router = useRouter();
 	let		[weight, setWeight] = useState<number | "">("");
 	let		[date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
@@ -26,7 +27,12 @@ export default function Analytics()
 		if (is_valid === false)
 			router.replace("/login");
 	}, [is_valid]);
-	if (is_valid === null || result === null)
+	useEffect(() =>
+	{
+		if (is_old_user === false)
+			router.replace("/started");
+	}, [is_old_user]);
+	if (is_valid === null || is_old_user === null || result === null)
 		return (null);
 	if (result === false)
 		return (null);
@@ -128,12 +134,13 @@ export default function Analytics()
 	const	bmi_message = bmi < 18.5 ? "Your BMI is below the healthy range." : bmi < 25 ? "Your BMI is in the healthy range." : bmi < 30 ? "Your BMI is above the healthy range." : "Your BMI is in the obese range.";
 	const	bmi_indicator = Math.min(Math.max(((bmi - 10) / (40 - 10)) * 100, 0), 100);
 	const	bmi_rotation = Math.min(Math.max(((bmi - 10) / (40 - 10)) * 180, 0), 180);
+
 	return (
 		<div>
 			<nav className="bg-[#E2DFFF] p-3">
-				<div className="flex justify-between">
+				<div className="flex justify-between xl:w-1/2 xl:mx-auto">
 					<div className="flex gap-2">
-						<img className="w-15 rounded-full" src="/logo.png" alt="logo"/>
+						<Link href={"/home"}><img className="w-15 rounded-full" src="/logo.png" alt="logo"/></Link>
 						<div>
 							<h1 className="text-2xl font-bold text-[#3323CC]">BellaWeight</h1>
 							<p className="text-[#68788F] font-semibold">Hello, {data ? data.name : ""}</p>
@@ -142,7 +149,7 @@ export default function Analytics()
 					<button onClick={() => {localStorage.removeItem("token"); router.replace("/login");}} className="bg-[#f12222] p-1 px-4 my-auto rounded-xl text-white mt-5 font-semibold cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-olive-400 hover:bg-[#e53939]">Log Out</button>
 				</div>
 			</nav>
-			<main className="m-5 xl:mx-20 animate__animated animate__bounceInLeft">
+			<main className="m-5 animate__animated animate__bounceInLeft xl:w-1/2 xl:mx-auto">
 				<div className="bg-[#4F46E5] p-5 rounded-2xl text-white">
 					<h3 className="uppercase text-[#B7C8E1] font-semibold text-sm">Current Weight</h3>
 					<p className="text-3xl font-bold">{current_weight}<span className="text-[0.6em]"> Kg</span></p>

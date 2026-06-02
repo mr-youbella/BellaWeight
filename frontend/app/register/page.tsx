@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 
 export default function Register()
 {
-	const	is_valid = useAuth();
+	const	{ is_valid } = useAuth();
 	const	router = useRouter();
 	let		[username, setUsername] = useState<string>("");
 	let		[email, setEmail] = useState<string>("");
@@ -19,7 +19,7 @@ export default function Register()
 	useEffect(() =>
 	{
 		if (is_valid === true)
-			router.replace("/started");
+			router.replace("/home");
 	}, [is_valid]);
 	if (is_valid === null)
 		return (null); 
@@ -57,9 +57,9 @@ export default function Register()
 	}
 
 	return (
-		<main className="flex flex-col md:w-2/3 xl:w-1/2 md:mx-auto p-10">
+		<main className="flex flex-col md:w-2/3 xl:w-1/2 md:mx-auto p-10 bg-[#F2EFFF]">
 			<div className="flex flex-col justify-center items-center text-center">
-				<img className="w-20" src="/logo.png" alt="logo"/>
+				<img className="w-15" src="/logo.png" alt="logo"/>
 				<h1 className="text-3xl font-bold">BellaWeight</h1>
 			</div>
 			<div className="mt-10 bg-white rounded-3xl shadow-2xl shadow-black/50 xl:w-1/2 xl:mx-auto p-7 py-10">

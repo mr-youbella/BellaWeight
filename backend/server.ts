@@ -5,6 +5,7 @@ import users from "./routes/users";
 import dataRoutes from "./routes/data";
 import allWeightRoutes from "./routes/all_weight";
 import auth from "./routes/auth";
+import planks from "./routes/planks";
 import fastifyCors from "@fastify/cors";
 import dotenv from "dotenv";
 
@@ -18,6 +19,7 @@ fastify.register(users);
 fastify.register(dataRoutes);
 fastify.register(allWeightRoutes);
 fastify.register(auth);
+fastify.register(planks);
 fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET! });
 declare module "fastify" { interface FastifyInstance { authenticate: (req: FastifyRequest, reply: FastifyReply) => Promise<void> }}
 

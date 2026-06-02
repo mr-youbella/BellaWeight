@@ -27,3 +27,12 @@ CREATE TABLE IF NOT EXISTS all_weight
 	weight	NUMERIC(5, 2) NOT NULL,
 	date	TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS planks
+(
+	id          SERIAL PRIMARY KEY,
+	user_id     INTEGER        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	minutes     INTEGER        NOT NULL DEFAULT 0,
+	seconds     INTEGER        NOT NULL DEFAULT 0,
+	date        TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+);

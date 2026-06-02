@@ -48,7 +48,7 @@ export default function useGetData(): { result: UserFullData | null | false, ref
 					return (setResult(false));
 				const	me = await res.json();
 
-				const [dataRes, weightRes] = await Promise.all
+				const [data_res, weight_res] = await Promise.all
 				([
 					fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/data/${me.id}`,
 					{
@@ -61,10 +61,10 @@ export default function useGetData(): { result: UserFullData | null | false, ref
 						headers: { Authorization: `Bearer ${token}` },
 					}),
 				]);
-				if (!dataRes.ok || !weightRes.ok)
+				if (!data_res.ok || !weight_res.ok)
 					return (setResult(false));
-				const	data = await dataRes.json();
-				const	all_weight = await weightRes.json();
+				const	data = await data_res.json();
+				const	all_weight = await weight_res.json();
 				setResult({ data, all_weight });
 			}
 			catch
